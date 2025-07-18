@@ -1,0 +1,27 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # Trigger the action on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy R script to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no addition.R ubuntu@<your-ec2-public-ip>:/home/ubuntu/
+
+      - name: Run R script on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@<your-ec2-public-ip> 'Rscript /home/ubuntu/addition.R 10 20'
